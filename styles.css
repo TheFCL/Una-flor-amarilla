@@ -1,0 +1,924 @@
+/* ==========================================================
+   Invernadero Xeno · estilos
+   Paleta: noche petróleo (#061420), violeta de nebulosa (#2a1f6b),
+   menta bioluminiscente (#7cffea) y oro de flor (#ffd23f).
+   ========================================================== */
+
+:root {
+  --night: #061420;
+  --petrol: #0d2a3a;
+  --violet: #2a1f6b;
+  --mint: #7cffea;
+  --gold: #ffd23f;
+  --ink: #e6fff8;
+  /* 1. Fondo seguro y opaco para móviles por defecto */
+  --glass: rgba(10, 30, 42, 0.85);
+  --line: rgba(124, 255, 234, 0.32);
+  font-family: "Baloo 2", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--night);
+  color: var(--ink);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Escenario ---------- */
+
+.stage {
+  --bloom: 0;
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 55% at 82% 8%, rgba(120, 90, 255, 0.22), transparent 70%),
+    radial-gradient(120% 80% at 50% 105%, #17415a 0%, #0c2536 38%, #08111f 72%),
+    var(--night);
+}
+
+.sky,
+.halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stars i {
+  position: absolute;
+  border-radius: 50%;
+  background: #dffcff;
+  animation: twinkle var(--d, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.planet {
+  position: absolute;
+  right: 7vw;
+  top: 9vh;
+  width: clamp(84px, 15vmin, 170px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #a99bff 0%, #5b4bd0 38%, #1f1650 78%);
+  box-shadow:
+    inset -14px -10px 28px rgba(5, 3, 30, 0.65),
+    0 0 60px rgba(120, 100, 255, 0.22);
+  opacity: 0.92;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.planet:hover {
+  transform: scale(1.06);
+  filter: brightness(1.15) drop-shadow(0 0 16px rgba(160, 140, 255, 0.5));
+}
+
+.planet:active {
+  transform: scale(0.98);
+}
+
+.planet::after {
+  content: "";
+  position: absolute;
+  left: -42%;
+  right: -42%;
+  top: 38%;
+  bottom: 38%;
+  border-radius: 50%;
+  border: 3px solid rgba(214, 205, 255, 0.42);
+  box-shadow: 0 0 12px rgba(160, 140, 255, 0.3);
+  transform: rotate(-16deg);
+  pointer-events: none;
+}
+
+/* Resplandor dorado que crece con la floración (--bloom lo actualiza el JS) */
+.halo {
+  left: 50%;
+  top: 44%;
+  right: auto;
+  bottom: auto;
+  width: min(120vmin, 900px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 214, 80, 0.3), rgba(255, 180, 60, 0.1) 45%, transparent 72%);
+  opacity: calc(0.12 + 0.88 * var(--bloom));
+}
+
+/* ---------- Escena SVG ---------- */
+
+.scene-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: clamp(52px, 8vh, 84px);
+  bottom: clamp(104px, 15vh, 132px);
+  /* 1. Aislar el contenedor en una capa 3D para evitar que la corrupción 
+        se propague al resto de la pantalla (Hardware Acceleration) */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* 2. Forzar a la GPU a crear una textura dedicada para el SVG */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.plant {
+  pointer-events: none;
+}
+
+.is-ready .plant {
+  pointer-events: auto;
+}
+
+.is-ready .leaf,
+.is-ready .head,
+.is-ready .stem-hit {
+  cursor: pointer;
+}
+
+.is-ready .head,
+.is-ready .stem-hit {
+  cursor: grab;
+}
+
+.is-dragging,
+.is-dragging .head,
+.is-dragging .stem-hit {
+  cursor: grabbing;
+}
+
+.canvas-fx,
+#fx {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Animaciones dentro del SVG */
+.flow {
+  stroke-dasharray: 4 12;
+  animation: flow 3.2s linear infinite;
+}
+
+.flow--rev {
+  animation-direction: reverse;
+}
+
+.ring-flow {
+  stroke-dasharray: 3 10;
+  animation: flow 16s linear infinite;
+}
+
+.mineral {
+  animation: twinkle var(--d, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* ---------- Estado del crecimiento ---------- */
+
+.hud {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem 0.5rem 0.85rem;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.hud-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 10px var(--mint);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.hud-stage {
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1;
+  min-width: 6.4ch;
+}
+
+.hud-bar {
+  width: 88px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.hud-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--mint), var(--gold));
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* ---------- Controles ---------- */
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 14px;
+}
+
+.hint {
+  min-height: 1.4em;
+  font-size: 0.98rem;
+  text-align: center;
+  color: rgba(230, 255, 248, 0.8);
+  transition: opacity 0.8s ease;
+}
+
+.hint.is-faded {
+  opacity: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.72rem 1.15rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.12s;
+  /* 3. Filtros de desenfoque eliminados de la base móvil */
+}
+
+.btn:hover {
+  border-color: rgba(124, 255, 234, 0.72);
+  background: rgba(16, 48, 64, 0.72);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.btn--primary {
+  border-color: rgba(255, 210, 63, 0.55);
+}
+
+.btn--primary:hover {
+  border-color: rgba(255, 210, 63, 0.95);
+}
+
+/* ---------- Animaciones ---------- */
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes flow {
+  to { stroke-dashoffset: -64; }
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+
+@media (max-width: 520px) {
+  /* Tus otras reglas móviles existentes... */
+  .hud-bar { width: 60px; }
+  .btn { padding: 0.68rem 0.95rem; font-size: 0.94rem; }
+  .planet { right: 4vw; top: 11vh; }
+
+  /* 3. Reducir la carga de rasterización vectorial en móviles */
+  .scene {
+    shape-rendering: optimizeSpeed;
+  }
+}
+
+@media (max-height: 560px) {
+  .scene-wrap {
+    top: 44px;
+    bottom: 92px;
+  }
+
+  .hint {
+    display: none;
+  }
+}
+
+/* ---------- Efectos Premium (Solo Alta Gama/Escritorio) ---------- */
+/* 4. Activamos la transparencia del cristal y el blur solo en pantallas grandes */
+@media (min-width: 768px) {
+  :root {
+    --glass: rgba(10, 30, 42, 0.58);
+  }
+  
+  .hud, .btn {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* ---------- Movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .stars i,
+  .flow,
+  .ring-flow,
+  .mineral,
+  .hud-dot {
+    animation: none;
+  }
+}
+
+/* ==========================================================
+   Tarjeta Polaroid Interactiva (Planeta)
+   ========================================================== */
+
+/* Miniatura flotante junto al planeta */
+.planet-mini-card {
+  position: absolute;
+  right: -10px;
+  bottom: 10px;
+  width: clamp(36px, 7.5vmin, 62px);
+  aspect-ratio: 0.82;
+  background: #ffffff;
+  padding: clamp(3px, 0.6vmin, 5px) clamp(3px, 0.6vmin, 5px) clamp(4px, 0.8vmin, 7px);
+  border-radius: 4px;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.65),
+    0 0 14px rgba(124, 255, 234, 0.35);
+  transform: rotate(-18deg);
+  transform-origin: center center;
+  animation: planetMiniOrbit 5s ease-in-out infinite alternate;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes planetMiniOrbit {
+  0% {
+    transform: rotate(-18deg) translate(0, 0);
+  }
+  50% {
+    transform: rotate(-14deg) translate(2px, -3px);
+  }
+  100% {
+    transform: rotate(-22deg) translate(-2px, 2px);
+  }
+}
+
+.mini-card-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 2px;
+}
+
+.mini-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  padding: 1px 1px 2px;
+}
+
+.mini-card-text span {
+  display: block;
+  height: 1.5px;
+  background: #6c7a89;
+  border-radius: 1px;
+}
+
+.mini-card-text span:nth-child(2) {
+  width: 65%;
+}
+
+.mini-card-frame {
+  flex: 1;
+  overflow: hidden;
+  background: #0d1e2a;
+  border-radius: 2px;
+}
+
+.mini-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Telón de fondo con desenfoque para la tarjeta de recuerdo */
+.memory-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 12, 22, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 950;
+}
+
+.memory-backdrop.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tarjeta Polaroid grande en el centro */
+.memory-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 960;
+  width: min(86vw, 360px);
+  background: #ffffff;
+  border-radius: 8px;
+  padding: clamp(14px, 4vw, 20px);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.75),
+    0 0 32px rgba(124, 255, 234, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  transform-origin: center center;
+  will-change: transform, opacity;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.memory-card-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--night);
+  border: 1.5px solid var(--mint);
+  color: var(--mint);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  z-index: 5;
+}
+
+.memory-card-close:hover {
+  transform: scale(1.15);
+  background: var(--mint);
+  color: var(--night);
+}
+
+.polaroid-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.polaroid-text-container {
+  width: 100%;
+  padding: 4px 6px 2px;
+  text-align: center;
+}
+
+.polaroid-quote {
+  font-family: "Baloo 2", cursive, system-ui, sans-serif;
+  font-size: clamp(1.08rem, 4vw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1e293b;
+  white-space: pre-line;
+  margin: 0;
+  word-break: break-word;
+}
+
+.polaroid-photo-container {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #0a1824;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.polaroid-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.polaroid-footer {
+  padding-top: 2px;
+  text-align: center;
+}
+
+.polaroid-tagline {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ==========================================================
+   Modal del Editor Secreto
+   ========================================================== */
+
+.editor-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 12, 22, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 1100;
+}
+
+.editor-backdrop.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.editor-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.94);
+  width: min(92vw, 490px);
+  max-height: min(90vh, 700px);
+  overflow-y: auto;
+  z-index: 1110;
+  background: linear-gradient(145deg, rgba(16, 42, 60, 0.95), rgba(7, 21, 32, 0.98));
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: clamp(16px, 4vw, 24px);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.85),
+    0 0 40px rgba(124, 255, 234, 0.2);
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  box-sizing: border-box;
+}
+
+.editor-modal.is-active {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.editor-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(124, 255, 234, 0.18);
+  padding-bottom: 0.75rem;
+}
+
+.editor-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.editor-icon {
+  font-size: 1.4rem;
+}
+
+.editor-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.editor-close-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--mint);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.editor-close-btn:hover {
+  background: rgba(124, 255, 234, 0.15);
+  transform: scale(1.1);
+}
+
+.editor-desc {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(230, 255, 248, 0.78);
+  margin: 0;
+}
+
+.editor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--mint);
+}
+
+.form-textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: rgba(6, 20, 32, 0.75);
+  border: 1.5px solid rgba(124, 255, 234, 0.3);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--mint);
+  box-shadow: 0 0 12px rgba(124, 255, 234, 0.3);
+}
+
+.photo-upload-zone {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: rgba(6, 20, 32, 0.6);
+  border: 1px dashed rgba(124, 255, 234, 0.35);
+  border-radius: 12px;
+  padding: 0.85rem;
+}
+
+.photo-preview-wrap {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background: #000;
+}
+
+.photo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.btn--upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.86rem;
+  padding: 0.55rem 0.9rem;
+  background: rgba(124, 255, 234, 0.12);
+  border: 1px solid var(--mint);
+  color: var(--mint);
+  border-radius: 999px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn--upload:hover {
+  background: rgba(124, 255, 234, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn--sm {
+  font-size: 0.78rem;
+  padding: 0.38rem 0.75rem;
+  color: rgba(230, 255, 248, 0.7);
+  background: transparent;
+  border: 1px solid rgba(124, 255, 234, 0.2);
+}
+
+.btn--sm:hover {
+  color: var(--ink);
+  border-color: rgba(124, 255, 234, 0.5);
+}
+
+.upload-tip {
+  font-size: 0.72rem;
+  color: rgba(230, 255, 248, 0.55);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Checkbox personalizado */
+.check-container {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.88rem;
+  color: rgba(230, 255, 248, 0.9);
+}
+
+.check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--mint);
+  border-radius: 4px;
+  background: rgba(6, 20, 32, 0.8);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.check-input:checked {
+  background: var(--mint);
+  box-shadow: 0 0 10px rgba(124, 255, 234, 0.5);
+}
+
+.check-input:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--night);
+}
+
+/* Botones del pie del editor */
+.editor-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-top: 1px solid rgba(124, 255, 234, 0.18);
+  padding-top: 0.85rem;
+}
+
+.btn--download {
+  background: linear-gradient(135deg, rgba(255, 210, 63, 0.22), rgba(124, 255, 234, 0.18));
+  border-color: var(--gold);
+  color: #fff;
+  font-weight: 700;
+}
+
+.btn--download:hover {
+  background: linear-gradient(135deg, rgba(255, 210, 63, 0.35), rgba(124, 255, 234, 0.3));
+  border-color: #ffe67a;
+  box-shadow: 0 0 16px rgba(255, 210, 63, 0.35);
+}
+
+/* Toast de feedback */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(13, 42, 58, 0.95);
+  border: 1px solid var(--mint);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 15px rgba(124, 255, 234, 0.3);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  z-index: 2000;
+  pointer-events: none;
+  animation: toastFade 3s ease forwards;
+}
+
+@keyframes toastFade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  12% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* Disparador secreto táctil invisible en la esquina */
+.secret-trigger {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  z-index: 50;
+  opacity: 0.01;
+  cursor: pointer;
+}
+

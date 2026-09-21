@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#061420">
+  <title>Invernadero Xeno · Una flor desde la semilla</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="stage" id="stage">
+
+    <!-- Fondo: cielo alienígena -->
+    <div class="sky" aria-hidden="true">
+      <div class="stars" id="stars"></div>
+      <div class="planet"></div>
+    </div>
+    <div class="halo" aria-hidden="true"></div>
+
+    <!-- Escena principal -->
+    <div class="scene-wrap">
+      <svg id="scene" class="scene" viewBox="60 90 480 760" preserveAspectRatio="xMidYMid meet"
+           role="img" aria-labelledby="sceneTitle sceneDesc">
+        <title id="sceneTitle">Una planta que crece desde una semilla</title>
+        <desc id="sceneDesc">Una semilla cae en una maceta de cristal, echa raíces, brota, desarrolla hojas y se abre en una flor amarilla luminosa. Cuando termina de crecer puedes tocar la flor, rozar las hojas y arrastrar el tallo.</desc>
+
+        <defs>
+          <!-- Tierra -->
+          <linearGradient id="gSoilBody" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4b2c49"/>
+            <stop offset=".55" stop-color="#341d3b"/>
+            <stop offset="1" stop-color="#1d1030"/>
+          </linearGradient>
+          <radialGradient id="gSoilTop" gradientUnits="userSpaceOnUse" cx="300" cy="590" r="170">
+            <stop offset="0" stop-color="#77496a"/>
+            <stop offset=".7" stop-color="#4a2a4b"/>
+            <stop offset="1" stop-color="#33193a"/>
+          </radialGradient>
+          <radialGradient id="gMound" cx=".5" cy=".3" r=".8">
+            <stop offset="0" stop-color="#8a5a7c"/>
+            <stop offset="1" stop-color="#4a2a4b"/>
+          </radialGradient>
+
+          <!-- Maceta -->
+          <linearGradient id="gRim" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#1e2a35"/>
+            <stop offset=".16" stop-color="#86a0b3"/>
+            <stop offset=".38" stop-color="#4d6273"/>
+            <stop offset=".72" stop-color="#33434f"/>
+            <stop offset=".92" stop-color="#6a8395"/>
+            <stop offset="1" stop-color="#18222b"/>
+          </linearGradient>
+          <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#9ff3ff" stop-opacity=".30"/>
+            <stop offset=".18" stop-color="#c6fbff" stop-opacity=".10"/>
+            <stop offset=".55" stop-color="#7fdcff" stop-opacity=".04"/>
+            <stop offset=".86" stop-color="#9ff3ff" stop-opacity=".12"/>
+            <stop offset="1" stop-color="#c6fbff" stop-opacity=".34"/>
+          </linearGradient>
+          <linearGradient id="gGlassShade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#000" stop-opacity="0"/>
+            <stop offset="1" stop-color="#02101a" stop-opacity=".42"/>
+          </linearGradient>
+          <radialGradient id="gInterior" cx=".5" cy=".3" r=".8">
+            <stop offset="0" stop-color="#173343"/>
+            <stop offset="1" stop-color="#08151f"/>
+          </radialGradient>
+
+          <!-- Pedestal -->
+          <radialGradient id="gPedTop" cx=".5" cy=".45" r=".6">
+            <stop offset="0" stop-color="#265570"/>
+            <stop offset=".7" stop-color="#12293a"/>
+            <stop offset="1" stop-color="#0a1622"/>
+          </radialGradient>
+          <linearGradient id="gPedBand" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#15303f"/>
+            <stop offset="1" stop-color="#050d15"/>
+          </linearGradient>
+          <radialGradient id="gPedGlow" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#7cffea" stop-opacity=".55"/>
+            <stop offset="1" stop-color="#7cffea" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Semilla -->
+          <radialGradient id="gSeed" cx=".35" cy=".3" r=".85">
+            <stop offset="0" stop-color="#e2b87f"/>
+            <stop offset=".5" stop-color="#94623a"/>
+            <stop offset="1" stop-color="#4a2c17"/>
+          </radialGradient>
+          <radialGradient id="gSeedHalo" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#fff0a6" stop-opacity=".95"/>
+            <stop offset=".4" stop-color="#7cffea" stop-opacity=".42"/>
+            <stop offset="1" stop-color="#7cffea" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Tallo: el degradado va por altura (la parte enterrada es pálida) -->
+          <linearGradient id="gStem" gradientUnits="userSpaceOnUse" x1="0" y1="700" x2="0" y2="240">
+            <stop offset="0" stop-color="#eaf7d0"/>
+            <stop offset=".2" stop-color="#cdefa6"/>
+            <stop offset=".25" stop-color="#5ed37a"/>
+            <stop offset=".6" stop-color="#2db565"/>
+            <stop offset="1" stop-color="#1a9a58"/>
+          </linearGradient>
+          <linearGradient id="gStemLine" gradientUnits="userSpaceOnUse" x1="0" y1="700" x2="0" y2="240">
+            <stop offset="0" stop-color="#b9cfa1"/>
+            <stop offset=".25" stop-color="#167a4a"/>
+            <stop offset="1" stop-color="#0d5a3a"/>
+          </linearGradient>
+
+          <!-- Hojas -->
+          <linearGradient id="gLeafA" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0e7a55"/>
+            <stop offset=".5" stop-color="#2fbf6b"/>
+            <stop offset="1" stop-color="#9be68a"/>
+          </linearGradient>
+          <linearGradient id="gLeafB" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0c6e62"/>
+            <stop offset=".5" stop-color="#1fae7c"/>
+            <stop offset="1" stop-color="#80e2a8"/>
+          </linearGradient>
+
+          <!-- Flor -->
+          <linearGradient id="gPetalOuter" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#ff9b00"/>
+            <stop offset=".45" stop-color="#ffc61c"/>
+            <stop offset="1" stop-color="#fff08a"/>
+          </linearGradient>
+          <linearGradient id="gPetalInner" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#ff8a00"/>
+            <stop offset=".5" stop-color="#ffb800"/>
+            <stop offset="1" stop-color="#ffde48"/>
+          </linearGradient>
+          <linearGradient id="gSepal" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#0e6b45"/>
+            <stop offset="1" stop-color="#3fcb77"/>
+          </linearGradient>
+          <radialGradient id="gDisc" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#c2651a"/>
+            <stop offset=".62" stop-color="#8a3f0d"/>
+            <stop offset="1" stop-color="#4b1f06"/>
+          </radialGradient>
+          <radialGradient id="gCore" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#fffbe0"/>
+            <stop offset=".5" stop-color="#ffdc64" stop-opacity=".9"/>
+            <stop offset="1" stop-color="#ffc83c" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gHalo" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#ffdc5a" stop-opacity=".55"/>
+            <stop offset=".5" stop-color="#ffbe3c" stop-opacity=".18"/>
+            <stop offset="1" stop-color="#ffbe3c" stop-opacity="0"/>
+          </radialGradient>
+
+          <!-- Recortes -->
+          <clipPath id="clipInterior">
+            <path d="M139 596 L199 758 A101 15 0 0 0 401 758 L461 596 Z"/>
+          </clipPath>
+          <clipPath id="clipBody">
+            <path d="M130 596 L192 764 A108 18 0 0 0 408 764 L470 596 A170 26 0 0 1 130 596 Z"/>
+          </clipPath>
+          <clipPath id="clipSoilTop">
+            <ellipse cx="300" cy="597" rx="150" ry="15"/>
+          </clipPath>
+          <clipPath id="clipLower">
+            <rect x="100" y="597" width="400" height="60"/>
+          </clipPath>
+        </defs>
+
+        <!-- ───────── Pedestal del invernadero ───────── -->
+        <g id="pedestal">
+          <ellipse cx="300" cy="792" rx="196" ry="24" fill="url(#gPedGlow)" opacity=".85"/>
+          <path d="M70 794 L70 812 A230 30 0 0 0 530 812 L530 794 Z" fill="url(#gPedBand)" stroke="#7cffea" stroke-opacity=".18"/>
+          <ellipse cx="300" cy="794" rx="230" ry="30" fill="url(#gPedTop)" stroke="#7cffea" stroke-opacity=".38" stroke-width="1.5"/>
+          <ellipse class="ring-flow" cx="300" cy="794" rx="198" ry="24" fill="none" stroke="#7cffea" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"/>
+          <ellipse cx="300" cy="794" rx="150" ry="18" fill="none" stroke="#7cffea" stroke-opacity=".22" stroke-width="1.2"/>
+          <ellipse cx="300" cy="786" rx="126" ry="13" fill="url(#gPedGlow)" opacity=".7"/>
+        </g>
+
+        <!-- ───────── Maceta: parte trasera ───────── -->
+        <g id="potBack">
+          <ellipse cx="300" cy="596" rx="170" ry="26" fill="url(#gRim)" stroke="#0d161d" stroke-width="1.5"/>
+          <ellipse cx="300" cy="594" rx="157" ry="19" fill="url(#gInterior)"/>
+        </g>
+
+        <!-- Tierra (vista en corte a través del cristal) -->
+        <g id="soilBody" clip-path="url(#clipInterior)">
+          <rect x="130" y="590" width="340" height="200" fill="url(#gSoilBody)"/>
+          <g id="soilBodyDots"></g>
+        </g>
+
+        <!-- Raíces (recortadas dentro de la maceta) -->
+        <g id="underground" clip-path="url(#clipInterior)"></g>
+
+        <!-- Semilla -->
+        <g id="seedLayer"></g>
+
+        <!-- Superficie de la tierra -->
+        <g id="soilTopGroup">
+          <ellipse cx="300" cy="597" rx="150" ry="15" fill="url(#gSoilTop)"/>
+          <g id="soilTopDots" clip-path="url(#clipSoilTop)"></g>
+        </g>
+
+        <!-- ───────── La planta (la construye script.js) ───────── -->
+        <g id="plant" class="plant"></g>
+
+        <!-- Mitad delantera de la tierra + montículo: el tallo sale "de" la tierra -->
+        <g id="soilFront">
+          <use href="#soilTopGroup" clip-path="url(#clipLower)"/>
+          <ellipse id="mound" cx="0" cy="0" rx="22" ry="8" fill="url(#gMound)" transform="translate(300 598) scale(0)"/>
+        </g>
+
+        <!-- Cristal de la maceta -->
+        <g id="glass" pointer-events="none">
+          <path d="M130 596 L192 764 A108 18 0 0 0 408 764 L470 596 A170 26 0 0 1 130 596 Z" fill="url(#gGlass)"/>
+          <path d="M130 596 L192 764 A108 18 0 0 0 408 764 L470 596 A170 26 0 0 1 130 596 Z" fill="url(#gGlassShade)"/>
+          <g clip-path="url(#clipBody)">
+            <path d="M158 628 L172 628 L212 754 L200 754 Z" fill="#fff" opacity=".14"/>
+            <path d="M180 632 L186 632 L216 730 L211 730 Z" fill="#fff" opacity=".10"/>
+            <path d="M438 640 L444 640 L414 734 L409 734 Z" fill="#fff" opacity=".08"/>
+            <!-- líneas de energía -->
+            <path class="flow" d="M168 650 L206 748" fill="none" stroke="#7cffea" stroke-opacity=".5" stroke-width="1.5" stroke-linecap="round"/>
+            <path class="flow flow--rev" d="M432 650 L394 748" fill="none" stroke="#7cffea" stroke-opacity=".5" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="206" cy="748" r="2.6" fill="#7cffea" opacity=".85"/>
+            <circle cx="394" cy="748" r="2.6" fill="#7cffea" opacity=".85"/>
+          </g>
+          <path d="M192 764 A108 18 0 0 0 408 764" fill="none" stroke="#7cffea" stroke-opacity=".55" stroke-width="1.6"/>
+          <path d="M130 596 L192 764 M470 596 L408 764" fill="none" stroke="#d2fbff" stroke-opacity=".42" stroke-width="1.4" stroke-linecap="round"/>
+        </g>
+
+        <!-- Borde delantero de la maceta -->
+        <g id="rimFront" pointer-events="none">
+          <path d="M130 596 A170 26 0 0 0 470 596 L457 594 A157 19 0 0 1 143 594 Z" fill="url(#gRim)" stroke="#0d161d" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M143 594 A157 19 0 0 0 457 594" fill="none" stroke="#7cffea" stroke-opacity=".85" stroke-width="1.6"/>
+          <path d="M136 600 A166 24 0 0 0 464 600" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.2"/>
+        </g>
+
+        <!-- Efectos (ondas de energía) -->
+        <g id="fxLayer" pointer-events="none"></g>
+      </svg>
+    </div>
+
+    <canvas id="fx" aria-hidden="true"></canvas>
+
+    <!-- Estado del crecimiento -->
+    <div class="hud" role="status" aria-live="polite">
+      <span class="hud-dot" aria-hidden="true"></span>
+      <span class="hud-stage" id="stageName">Siembra</span>
+      <span class="hud-bar" aria-hidden="true"><span id="stageBar"></span></span>
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+      <p class="hint" id="hint"></p>
+
+      <div class="actions" id="actionsGrowing">
+        <button class="btn btn--primary" id="btnSkip" type="button">Saltar animación</button>
+      </div>
+
+      <div class="actions" id="actionsReady" hidden>
+        <button class="btn" id="btnGust" type="button">Brisa</button>
+        <button class="btn" id="btnSpores" type="button">Esporas</button>
+        <button class="btn" id="btnReplay" type="button">Volver a plantar</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
